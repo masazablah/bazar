@@ -36,7 +36,6 @@ app.get('/CATALOG_WEBSERVICE_IP/:topic', (req, res) => {
 })
 
 app.get('/CATALOG_WEBSERVICE_IP/find/:itemName', (req, res) => {
-    res.send("masa");
     const name = req.params.itemName;
     
     let result = [];
@@ -49,6 +48,16 @@ app.get('/CATALOG_WEBSERVICE_IP/find/:itemName', (req, res) => {
     }
     res.send(result);
 })
+
+app.get('/CATALOG_WEBSERVICE_IP/findbytopic/:itemTopic', (req, res) => {
+    const topic = req.params.itemTopic;
+
+    // Use Array.filter to find all books that match the topic
+    const result = catalog.filter(book => book.topic === topic);
+
+    res.json(result); // Use res.json to automatically set the Content-Type header to application/json
+});
+
 
 app.get('/CATALOG_WEBSERVICE_IP/getInfo/:itemNum', (req, res) => {
     const num = req.params.itemNum;
@@ -201,3 +210,13 @@ app.get('/CATALOG_WEBSERVICE_IP/books', (req, res) => {
 });
 
 
+app.get('/CATALOG_WEBSERVICE_IP/topic/:topicName', (req, res) => {
+    const topicName = req.params.topicName; // Extract the topic from URL parameter
+    const booksByTopic = catalog.filter(book => book.topic === topicName); // Filter the catalog
+
+    if (booksByTopic.length) {
+        res.json(booksByTopic); // Send matched books as JSON
+    } else {
+        res.status(404).json({ message: "No books found for this topic." }); // Handle no matches
+    }
+});

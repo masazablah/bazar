@@ -37,6 +37,34 @@ app.get('/CATALOG_WEBSERVICE_IP/search/:itemName', (req, response) => {
 });
 
 
+app.get('/CATALOG_WEBSERVICE_IP/searchByTopic/:itemTopic', (req, response) => {
+    let data = [];
+    http.get(`http://172.17.0.2:4000/CATALOG_WEBSERVICE_IP/findbytopic/${req.params.itemTopic}`, (res) => {
+        res.on('data', (chunk) => {
+            data.push(chunk);
+        });
+        res.on('end', () => {
+            if (data.toString() === "0") {
+                info = "the book is no found";
+            }
+            else {
+                info = data.join(''); 
+            }
+
+            console.log("info = ", info);
+            response.send(info); 
+        });
+    })
+        .on('error', (error) => {
+            console.log(error);
+            response.status(500).send('Internal Server Error'); 
+        });
+});
+
+
+
+
+
 
 app.get('/CATALOG_WEBSERVICE_IP/purchase/:itemNUM', (req, response) => {
     let data = [];
