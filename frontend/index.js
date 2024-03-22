@@ -106,3 +106,5 @@ app.get('/CATALOG_WEBSERVICE_IP/info/:itemNUM', (req, response) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+

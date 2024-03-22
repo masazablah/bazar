@@ -204,10 +204,7 @@ app.post('/CATALOG_WEBSERVICE_IP/addBook', (req, res) => {
         });
 });
 
-app.get('/CATALOG_WEBSERVICE_IP/books', (req, res) => {
-    console.log('Fetching all books:', catalog);
-    res.json(catalog);
-});
+
 
 
 app.get('/CATALOG_WEBSERVICE_IP/topic/:topicName', (req, res) => {
@@ -218,5 +215,14 @@ app.get('/CATALOG_WEBSERVICE_IP/topic/:topicName', (req, res) => {
         res.json(booksByTopic); // Send matched books as JSON
     } else {
         res.status(404).json({ message: "No books found for this topic." }); // Handle no matches
+    }
+});
+
+
+app.get('/catalog/books', (req, res) => {
+    if (catalog.length > 0) {
+        res.json(catalog); // Send the entire catalog as JSON
+    } else {
+        res.status(404).json({ message: "No books found." });
     }
 });
