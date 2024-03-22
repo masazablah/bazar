@@ -7,15 +7,20 @@ const catalog = [];
 const soldBooks = [];
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
+// Use Express's built-in middleware to parse JSON bodies
+app.use(express.json());
+
 fs.createReadStream('catalog.csv')
     .pipe(csv())
-    .on('data', (data) => {
-        catalog.push(data);
-    }).on('end', () => {
-        console.log(catalog);
-    }).on('error', (error) => {
-        console.error(error);
+    .on('data', (data) => catalog.push(data))
+    .on('end', () => {
+        console.log('CSV file processing completed.');
+        console.log(catalog); // This will show the content of catalog
+    })
+    .on('error', (error) => {
+        console.error('Error reading CSV file:', error);
     });
+
 
 app.get('/CATALOG_WEBSERVICE_IP/:topic', (req, res) => {
     const topic = req.params.topic;
@@ -31,7 +36,6 @@ app.get('/CATALOG_WEBSERVICE_IP/:topic', (req, res) => {
 })
 
 app.get('/CATALOG_WEBSERVICE_IP/find/:itemName', (req, res) => {
-    res.send("masa");
     const name = req.params.itemName;
     
     let result = [];
@@ -44,6 +48,16 @@ app.get('/CATALOG_WEBSERVICE_IP/find/:itemName', (req, res) => {
     }
     res.send(result);
 })
+
+app.get('/CATALOG_WEBSERVICE_IP/findbytopic/:itemTopic', (req, res) => {
+    const topic = req.params.itemTopic;
+
+    // Use Array.filter to find all books that match the topic
+    const result = catalog.filter(book => book.topic === topic);
+
+    res.json(result); // Use res.json to automatically set the Content-Type header to application/json
+});
+
 
 app.get('/CATALOG_WEBSERVICE_IP/getInfo/:itemNum', (req, res) => {
     const num = req.params.itemNum;
@@ -148,4 +162,61 @@ app.get('/CATALOG_WEBSERVICE_IP/updatePrice/:itemNum/:newPrice', (req, res) => {
 })
 app.listen(PORT, () => {
     console.log(`server is running on port ${PORT}`);
+});
+
+// add book 
+app.post('/CATALOG_WEBSERVICE_IP/addBook', (req, res) => {
+    const { title, price, quantity, topic } = req.body;
+
+    // Generate the next ID
+    let maxId = 0;
+    catalog.forEach(book => {
+        if (book.id && Number(book.id) > maxId) {
+            maxId = Number(book.id);
+        }
+    });
+    const newId = maxId + 1; // Auto-incremented ID
+
+    // Add the new book to the catalog array
+    const newBook = { id: newId.toString(), title, price, quantity, topic };
+    catalog.push(newBook);
+
+    // Update the catalog.csv file
+    const csvWriter = createCsvWriter({
+        path: 'catalog.csv',
+        header: [
+            { id: 'id', title: 'id' },
+            { id: 'price', title: 'price' },
+            { id: 'title', title: 'title' },
+            { id: 'quantity', title: 'quantity' },
+            { id: 'topic', title: 'topic' }
+        ]
+    });
+
+    csvWriter.writeRecords(catalog) // Writing the entire updated catalog to ensure consistency
+        .then(() => {
+            console.log('Book added to catalog.');
+            res.send({ message: 'Book successfully added to the catalog.', book: newBook });
+        })
+        .catch(error => {
+            console.error('Failed to add book to catalog:', error);
+            res.status(500).send({ message: 'Failed to add book to catalog.' });
+        });
+});
+
+app.get('/CATALOG_WEBSERVICE_IP/books', (req, res) => {
+    console.log('Fetching all books:', catalog);
+    res.json(catalog);
+});
+
+
+app.get('/CATALOG_WEBSERVICE_IP/topic/:topicName', (req, res) => {
+    const topicName = req.params.topicName; // Extract the topic from URL parameter
+    const booksByTopic = catalog.filter(book => book.topic === topicName); // Filter the catalog
+
+    if (booksByTopic.length) {
+        res.json(booksByTopic); // Send matched books as JSON
+    } else {
+        res.status(404).json({ message: "No books found for this topic." }); // Handle no matches
+    }
 });
