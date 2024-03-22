@@ -1,0 +1,22 @@
+{
+  "name": "bazar.com",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masazablah/bazar.git"
+  },
+  "author": "Masa Zablah",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/masazablah/bazar/issues"
+  },
+  "homepage": "https://github.com/masazablah/bazar#readme",
+  "dependencies": {
+    "express": "^4.18.3"
+  }
+}
