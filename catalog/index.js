@@ -12,13 +12,15 @@ app.use(express.json());
 
 fs.createReadStream('catalog.csv')
     .pipe(csv())
-    .on('data', (data) => {
-        catalog.push(data);
-    }).on('end', () => {
-        console.log(catalog);
-    }).on('error', (error) => {
-        console.error(error);
+    .on('data', (data) => catalog.push(data))
+    .on('end', () => {
+        console.log('CSV file processing completed.');
+        console.log(catalog); // This will show the content of catalog
+    })
+    .on('error', (error) => {
+        console.error('Error reading CSV file:', error);
     });
+
 
 app.get('/CATALOG_WEBSERVICE_IP/:topic', (req, res) => {
     const topic = req.params.topic;
@@ -192,3 +194,10 @@ app.post('/CATALOG_WEBSERVICE_IP/addBook', (req, res) => {
             res.status(500).send({ message: 'Failed to add book to catalog.' });
         });
 });
+
+app.get('/CATALOG_WEBSERVICE_IP/books', (req, res) => {
+    console.log('Fetching all books:', catalog);
+    res.json(catalog);
+});
+
+
